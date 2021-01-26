@@ -10,4 +10,4 @@ Features:
         call functions "recursion!"
     ```
   - Make-like syntax
-  - A language in under 140 lines!
+  - A language in 140 lines!
