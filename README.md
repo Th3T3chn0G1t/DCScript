@@ -2,7 +2,7 @@
 A terrible lang I wrote for fun
 
 Features:
-  - Flow control with `if`, `while` and `go`
+  - Flow control with `if` and `go`
   - `%variables = true`
   - ```
     functions:
