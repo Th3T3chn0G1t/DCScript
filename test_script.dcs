@@ -1,28 +1,26 @@
 #!/usr/local/bin/DCS
-printathing:
-	p %ARG_0 has been printed
+
+print:
+	pyval print("%ARGSV")
+
+wait:
+	pyval sleep(int("%ARG_0"))
 
 main:
-	print Help and Stuff
-	wait
-	p You can use shorthand
-	w
+	call print Help and Stuff
+	call wait 1
 
 	if true
-		p Conditionals
-		? true
-			p Embedded Conditionals!
+		call print Conditionals
+		if true
+			call print Embedded Conditionals!
 
-	p Take program/function arguments through %ARG_0 %ARG_1 etc.
-	w
-	call printathing Function_Calls!
-
-	%an_alias = call printathing
-	%print_alias Aliasing of stuff!
-
+	call print Take program/function arguments through %ARG_0 %ARG_1 etc.
+	call wait 1
+	
 	%VARIABLES = 0
 	if %VARIABLES < 5 
-		p Loop %VARIABLES
-		w
+		call print Loop %VARIABLES
+		call wait 1
 		%VARIABLES = %VARIABLES + 1
 		go -4

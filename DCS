@@ -2,11 +2,9 @@
 from time import sleep
 from re import search, match, findall
 from sys import argv
-
 if(len(argv) < 2):
-	print("Usage: " + argv[0] + " [script] [target]")
+	print("Usage: " + argv[0] + " [script]	")
 	exit(-1)
-
 def read_file(path: str):
 	data: dict = {}
 	with open(path, 'r') as f:	
@@ -14,10 +12,8 @@ def read_file(path: str):
 		for line in lines:
 			data[lines.index(line)] = line
 	return data
-	
 def startswith_lpadded(value: str, key: str, count: int, padding: str = '~'):
 	return value.startswith((padding * count) + key)
-
 def get_lpadding(value: str, padding: str = '~'):
 	count: int = 0
 	for c in value:
@@ -25,13 +21,11 @@ def get_lpadding(value: str, padding: str = '~'):
 			count += 1
 		else:
 			return count
-
 def dict_value_key(value: object, values: dict):
 	for key in values:
 		if(values[key] == value):
 			return key
 	return None
-
 def dict_next(key: object, values: dict):
 	f: bool = 0
 	for k in values:
@@ -41,26 +35,22 @@ def dict_next(key: object, values: dict):
 		if(f):
 			return k
 	return None
-
 def replace_dict(expr: str, replace: str, values: dict):
 	for key in values:
 		values[key] = values[key].replace(expr, replace)
 	return values
-
 def regex_replace_dict(expr: str, replace: str, values: dict):
 	for key in values:
 		found = search(expr, values[key])
 		if(found):
 			values[key] = values[key].replace(found.group(), replace)
 	return values
-
 def regex_remove_keys_dict(expr: str, values: dict):
 	loc: dict = values.copy()
 	for key in loc:
 		if(search(expr, values[key])):
 			values.pop(key)
 	return values
-
 def regex_subdict(expr: str, values: dict):
 	ret: dict = {}
 	for key in values:
@@ -68,9 +58,7 @@ def regex_subdict(expr: str, values: dict):
 		if(found):
 			ret[key] = values[key]
 	return ret
-
 parser_indent: int = 1
-
 command_parser_input: dict = read_file(argv[1])
 mathematical_expressions: list = { '==', '<', '>', '=', '\\+', '\\-', '\\*', '/' }
 command_parser_input = replace_dict('\t', '~', command_parser_input)
@@ -80,15 +68,11 @@ command_parser_input = regex_remove_keys_dict('^$', command_parser_input)
 command_parser_input = regex_remove_keys_dict('^~*$', command_parser_input)
 for expr in mathematical_expressions:
 	command_parser_input = regex_replace_dict('(\\s*)?' + expr + '(\\s*)?', expr.replace('\\', ''), command_parser_input)
-
 command_labels: dict = regex_subdict('^\\S*:\\s*$', command_parser_input)
 command_labels = replace_dict(':', '', command_labels)
-
 variable_map: dict = {}
-
 def parse(message):
 	global parser_indent
-
 	message_sub: list = message.split(' ')
 	command: str = message.split(' ')[0]
 	if command in command_labels.values():
@@ -100,24 +84,20 @@ def parse(message):
 				i += 1
 				continue
 			try:
-				if(line >= dict_next(command_ln, command_labels)):
+				if(line >= dict_next(command_ln, command_labels) or line > max(command_parser_input.keys())):
 					return
 			except:
 				pass
-			if(line > max(command_parser_input.keys())):
-				return
 			statement: str = command_parser_input[line]
 			if(search('^~*go-', statement)):
 				statement = statement.replace('go', 'go ', 1)
-#			print(statement)
-
+			statement = statement.replace("%ARGSV", ' '.join(message.split(' ')[1:]))
 			arg_vars: list = findall('%ARG_[0-9]', statement)
 			for arg in arg_vars:
 				try:
 					statement = statement.replace("%ARG_" + str(arg_vars.index(arg)), message_sub[int(arg.split('_')[1]) + 1])
 				except:
 					statement = statement.replace("%ARG_" + str(arg_vars.index(arg)), "NONE")
-
 			var_labels: list = findall('%.*=[^=]*', statement)
 			if(var_labels):
 				for var in var_labels:
@@ -130,24 +110,16 @@ def parse(message):
 						variable_map[var_sub[0].lstrip('%')] = var_sub[1]
 				i += 1
 				continue
-	
 			for key in variable_map:
 				statement = statement.replace('%' + key, str(variable_map[key]))
-
-
-			numcond_vars: list = []
-			numcond_vars += findall('[0-9]*==[0-9]*', statement)
-			numcond_vars += findall('[0-9]*>[0-9]*', statement)
-			numcond_vars += findall('[0-9]*<[0-9]*', statement)
+			numcond_vars = findall('[0-9]*[>,<][0-9]*', statement)
 			for cond in numcond_vars:
 				statement = statement.replace(cond, str(eval(cond)).upper())
-
 			statement_sub: str = statement.split(' ', 1)
 			exc: str = statement_sub[0].upper()
-			
 			if(get_lpadding(statement) < parser_indent):
 				parser_indent = get_lpadding(statement)
-			if(startswith_lpadded(statement.upper(), "IF TRUE", parser_indent) or startswith_lpadded(statement.upper(), "? TRUE", parser_indent)):
+			if(startswith_lpadded(statement.upper(), "IF TRUE", parser_indent)):
 				parser_indent += 1
 				i += 1
 				continue
@@ -157,27 +129,15 @@ def parse(message):
 				parser_indent = old_indent
 				i += 1
 				continue
-			if(startswith_lpadded(exc, "WAIT", parser_indent) or startswith_lpadded(exc, "W", parser_indent)):
-				try:
-					sleep(float(statement_sub[1]))
-				except:
-					sleep(1.0)
+			if(startswith_lpadded(statement.upper(), "PYVAL", parser_indent)):
+				eval(statement_sub[1])
 				i += 1
 				continue
-			if(startswith_lpadded(exc, "PRINT", parser_indent) or startswith_lpadded(exc, "P", parser_indent)):
-				print(statement_sub[1])
-				i += 1
-				continue
-			if(startswith_lpadded(exc, "GO", parser_indent) or startswith_lpadded(exc, "G", parser_indent)):
+			if(startswith_lpadded(exc, "GO", parser_indent)):
 				i += int(statement_sub[1])
 				continue
 			i += 1
-	else:
-		print("No such target " + command)
-
 if(len(argv) == 2):
 	parse("main")
 elif(argv[2] == "run"):
 	parse("main " + ' '.join(argv[2:]))	
-else:
-	parse(' '.join(argv[1:]))
