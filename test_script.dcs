@@ -16,6 +16,7 @@ main:
 			call print Embedded Conditionals!
 
 	call print Take program/function arguments through %ARG_0 %ARG_1 etc.
+	call print Full args with %ARGSV
 	call wait 1
 	
 	%VARIABLES = 0
