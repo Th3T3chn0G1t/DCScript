@@ -22,7 +22,7 @@ main:
 	call pw Full args with %ARGSV
 	
 	%var = 0
-	if %var < 5 
+	if %var < 5
 		call pw Loop %var
 		%var = %var + 1
 		go -3

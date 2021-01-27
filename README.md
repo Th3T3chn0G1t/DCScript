@@ -13,4 +13,4 @@ Features:
   - Include other files with `@include`
   - Working on an stdlib
   - Use python statements inline with `pyval` and import python packages with `@import`
-  - A language in 140 lines!
+  - A language in 130 lines!

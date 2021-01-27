@@ -18,12 +18,11 @@ def dict_value_key(value: object, values: dict):
 			return key
 	return None
 def dict_next(key: object, values: dict):
-	f: bool = 0
+	f: bool = False
 	for k in values:
 		if(k == key):
 			f = True
-			continue
-		if(f):
+		elif(f):
 			return k
 	return None
 def replace_dict(expr: str, replace: str, values: dict):
@@ -37,8 +36,7 @@ def regex_replace_dict(expr: str, replace: str, values: dict):
 			values[key] = values[key].replace(found.group(), replace)
 	return values
 def regex_remove_keys_dict(expr: str, values: dict):
-	loc: dict = values.copy()
-	for key in loc:
+	for key in values.copy():
 		if(search(expr, values[key])):
 			values.pop(key)
 	return values
@@ -59,39 +57,29 @@ for include in findall("\\@include\\s*.*", file):
 		file = file.replace(include, open(include.replace("@include ", ''), 'r').read())
 for imp in findall("\\@import\\s*.*", file):
 	module = import_module(imp.replace("@import ", '')).__dict__
-	module_dict = module
-	imports = [name for name in module_dict if not name.startswith('_')]
-	globals().update({name: module_dict[name] for name in imports})
+	globals().update({name: module[name] for name in [name for name in module if not name.startswith('_')]})
 lines: list = file.split('\n')
 for line in lines:
 	command_parser_input[lines.index(line)] = line
-mathematical_expressions: list = { '==', '<', '>', '=', '\\+', '\\-', '\\*', '/' }
 command_parser_input = replace_dict('\t', '~', command_parser_input)
 command_parser_input = replace_dict(' ' * 4, '~', command_parser_input)
 command_parser_input = regex_remove_keys_dict('^#.*$', command_parser_input) 
 command_parser_input = regex_remove_keys_dict('^$', command_parser_input)
 command_parser_input = regex_remove_keys_dict('^~*$', command_parser_input)
-for expr in mathematical_expressions:
-	command_parser_input = regex_replace_dict('(\\s*)?' + expr + '(\\s*)?', expr.replace('\\', ''), command_parser_input)
 command_labels: dict = regex_subdict('^\\S*:\\s*$', command_parser_input)
 command_labels = replace_dict(':', '', command_labels)
 variable_map: dict = {}
 def parse(message):
 	global parser_indent
 	message_sub: list = message.split(' ')
-	command: str = message.split(' ')[0]
-	if command in command_labels.values():
-		command_ln: int = dict_value_key(command, command_labels)
-		i: int = 0
+	if message_sub[0] in command_labels.values():
+		command_ln: int = dict_value_key(message_sub[0], command_labels)
+		i: int = list(command_parser_input.keys()).index(command_ln) + 1
 		while i < len(command_parser_input):
 			line: int = list(command_parser_input.keys())[i]
-			if(not (line > command_ln)):
-				i += 1
-				continue
 			if(dict_next(command_ln, command_labels) and (line >= dict_next(command_ln, command_labels) or line > max(command_parser_input.keys()))):
 				return
 			statement: str = command_parser_input[line]
-			statement = statement.replace('go-', 'go -', 1)
 			statement = statement.replace("%ARGSV", ' '.join(message_sub[1:]))
 			arg_vars: list = findall('%ARG_[0-9]', statement)
 			for arg in arg_vars:
@@ -101,6 +89,7 @@ def parse(message):
 			if(var_labels):
 				for var in var_labels:
 					var_sub: list = var.split('=')
+					var_sub[0] = var_sub[0].strip()
 					for key in variable_map:
 						var_sub[1] = var_sub[1].replace('%', '').replace(key, str(variable_map[key]))
 					try:
@@ -111,11 +100,10 @@ def parse(message):
 				continue
 			for key in variable_map:
 				statement = statement.replace('%' + key, str(variable_map[key]))
-			numcond_vars = findall('[0-9]*[><][0-9]*', statement)
+			numcond_vars = findall('[0-9]*\\s*[><]\\s*[0-9]*', statement)
 			for cond in numcond_vars:
 				statement = statement.replace(cond, str(eval(cond)).upper())
 			statement_sub: str = statement.split(' ', 1)
-			exc: str = statement_sub[0].upper()
 			if(get_lpadding(statement) < parser_indent):
 				parser_indent = get_lpadding(statement)
 			if(startswith_lpadded(statement.upper(), "IF TRUE", parser_indent)):
@@ -132,8 +120,11 @@ def parse(message):
 				variable_map['return'] = str(eval(statement_sub[1]))
 				i += 1
 				continue
-			if(startswith_lpadded(exc, "GO", parser_indent)):
-				i += int(statement_sub[1])
+			if(startswith_lpadded(statement.upper(), "GO", parser_indent)):
+				if '+' in statement.upper() or '-' in statement.upper():
+					i += int(statement_sub[1])
+				else:
+					i =  int(statement_sub[1])
 				continue
 			i += 1
 parse("main " + ' '.join(argv[2:]))
