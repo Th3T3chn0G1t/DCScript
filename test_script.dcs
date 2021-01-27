@@ -1,10 +1,5 @@
 #!/usr/local/bin/DCS
-
-print:
-	pyval print("%ARGSV")
-
-wait:
-	pyval sleep(int("%ARG_0"))
+@include base
 
 main:
 	call print Help and Stuff
@@ -15,7 +10,7 @@ main:
 		if true
 			call print Embedded Conditionals!
 
-	call print Take program/function arguments through %ARG_0 %ARG_1 etc.
+	call print Take function arguments through %ARG_0 %ARG_1 etc.
 	call print Full args with %ARGSV
 	call wait 1
 	

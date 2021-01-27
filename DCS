@@ -2,9 +2,6 @@
 from time import sleep
 from re import search, match, findall
 from sys import argv
-if(len(argv) < 2):
-	print("Usage: " + argv[0] + " [script]	")
-	exit(-1)
 def startswith_lpadded(value: str, key: str, count: int, padding: str = '~'):
 	return value.startswith((padding * count) + key)
 def get_lpadding(value: str, padding: str = '~'):
@@ -53,10 +50,12 @@ def regex_subdict(expr: str, values: dict):
 	return ret
 parser_indent: int = 1
 command_parser_input: dict = {}
-with open(argv[1], 'r') as f:
-	lines: list = f.read().split('\n')
-	for line in lines:
-		command_parser_input[lines.index(line)] = line
+file: str = open(argv[1], 'r').read()
+for include in findall("\\@include\\s*.*", file):
+	file = file.replace(include, open(include.replace("@include ", '') + ".dcs", 'r').read())
+lines: list = file.split('\n')
+for line in lines:
+	command_parser_input[lines.index(line)] = line
 mathematical_expressions: list = { '==', '<', '>', '=', '\\+', '\\-', '\\*', '/' }
 command_parser_input = replace_dict('\t', '~', command_parser_input)
 command_parser_input = replace_dict(' ' * 4, '~', command_parser_input)
@@ -134,7 +133,7 @@ def parse(message):
 				i += int(statement_sub[1])
 				continue
 			i += 1
-if(len(argv) == 2):
+if(len(argv) < 2):
+	print("Usage: " + argv[0] + " [script]")
+else:
 	parse("main")
-elif(argv[2] == "run"):
-	parse("main " + ' '.join(argv[2:]))	

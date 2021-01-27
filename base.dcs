@@ -1,0 +1,5 @@
+print:
+	pyval print("%ARGSV")
+
+wait:
+	pyval sleep(int("%ARG_0"))
