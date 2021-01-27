@@ -7,7 +7,9 @@ Features:
   - ```
     functions:
         print With %ARG_0
-        call functions "recursion!"
+        call functions recursion!
     ```
   - Make-like syntax
-  - A language in 140 lines!
+  - Include other files with `@include`
+  - Use python statements inline with `pyval` and import python packages with `@import`  
+  - A language in under 140 lines!
