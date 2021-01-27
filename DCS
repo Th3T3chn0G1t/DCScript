@@ -52,7 +52,7 @@ parser_indent: int = 1
 command_parser_input: dict = {}
 file: str = open(argv[1], 'r').read()
 for include in findall("\\@include\\s*.*", file):
-	file = file.replace(include, open(include.replace("@include ", '') + ".dcs", 'r').read())
+	file = file.replace(include, open(include.replace("@include ", ''), 'r').read())
 for imp in findall("\\@import\\s*.*", file):
 	module = import_module(imp.replace("@import ", '')).__dict__
 	module_dict = module
@@ -126,7 +126,7 @@ def parse(message):
 				i += 1
 				continue
 			if(startswith_lpadded(statement.upper(), "PYVAL", parser_indent)):
-				eval(statement_sub[1])
+				variable_map['return'] = str(eval(statement_sub[1]))
 				i += 1
 				continue
 			if(startswith_lpadded(exc, "GO", parser_indent)):

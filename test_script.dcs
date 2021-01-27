@@ -1,22 +1,25 @@
 #!/usr/local/bin/DCS
-@include base
+@include base.dcs
+
+pw:
+	call print %ARGSV
+	call wait 1
 
 main:
-	call print Help and Stuff
-	call wait 1
+	call print What is your name?
+	pyval input()
+	call pw Hello %return
 
 	if true
-		call print Conditionals
+		call pw Conditionals
 		if true
-			call print Embedded Conditionals!
+			call pw Embedded Conditionals!
 
-	call print Take function arguments through %ARG_0 %ARG_1 etc.
-	call print Full args with %ARGSV
-	call wait 1
+	call pw Take function arguments through %ARG_0 %ARG_1 etc.
+	call pw Full args with %ARGSV
 	
-	%VARIABLES = 0
-	if %VARIABLES < 5 
-		call print Loop %VARIABLES
-		call wait 1
-		%VARIABLES = %VARIABLES + 1
-		go -4
+	%var = 0
+	if %var < 5 
+		call pw Loop %var
+		%var = %var + 1
+		go -3
