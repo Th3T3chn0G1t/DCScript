@@ -84,11 +84,8 @@ def parse(message):
 			if(not (line > command_ln)):
 				i += 1
 				continue
-			try:
-				if(line >= dict_next(command_ln, command_labels) or line > max(command_parser_input.keys())):
-					return
-			except:
-				pass
+			if(dict_next(command_ln, command_labels) and (line >= dict_next(command_ln, command_labels) or line > max(command_parser_input.keys()))):
+				return
 			statement: str = command_parser_input[line]
 			if(search('^~*go-', statement)):
 				statement = statement.replace('go', 'go ', 1)
@@ -136,4 +133,4 @@ def parse(message):
 				i += int(statement_sub[1])
 				continue
 			i += 1
-parse("main")
+parse("main " + ' '.join(argv[2:]))
