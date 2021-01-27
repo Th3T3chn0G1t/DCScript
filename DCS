@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from time import sleep
+from importlib import import_module
 from re import search, match, findall
 from sys import argv
 def startswith_lpadded(value: str, key: str, count: int, padding: str = '~'):
@@ -53,6 +53,11 @@ command_parser_input: dict = {}
 file: str = open(argv[1], 'r').read()
 for include in findall("\\@include\\s*.*", file):
 	file = file.replace(include, open(include.replace("@include ", '') + ".dcs", 'r').read())
+for imp in findall("\\@import\\s*.*", file):
+	module = import_module(imp.replace("@import ", '')).__dict__
+	module_dict = module
+	imports = [name for name in module_dict if not name.startswith('_')]
+	globals().update({name: module_dict[name] for name in imports})
 lines: list = file.split('\n')
 for line in lines:
 	command_parser_input[lines.index(line)] = line
@@ -87,13 +92,11 @@ def parse(message):
 			statement: str = command_parser_input[line]
 			if(search('^~*go-', statement)):
 				statement = statement.replace('go', 'go ', 1)
-			statement = statement.replace("%ARGSV", ' '.join(message.split(' ')[1:]))
+			statement = statement.replace("%ARGSV", ' '.join(message_sub[1:]))
 			arg_vars: list = findall('%ARG_[0-9]', statement)
 			for arg in arg_vars:
-				try:
+				if(len(message_sub) > int(arg.split('_')[1]) + 1):
 					statement = statement.replace("%ARG_" + str(arg_vars.index(arg)), message_sub[int(arg.split('_')[1]) + 1])
-				except:
-					statement = statement.replace("%ARG_" + str(arg_vars.index(arg)), "NONE")
 			var_labels: list = findall('%.*=[^=]*', statement)
 			if(var_labels):
 				for var in var_labels:
@@ -133,7 +136,4 @@ def parse(message):
 				i += int(statement_sub[1])
 				continue
 			i += 1
-if(len(argv) < 2):
-	print("Usage: " + argv[0] + " [script]")
-else:
-	parse("main")
+parse("main")
