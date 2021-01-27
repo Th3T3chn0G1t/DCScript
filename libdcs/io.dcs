@@ -1,0 +1,11 @@
+print:
+	pyval print("%ARGSV")
+
+input:
+    pyval input()
+
+read:
+    pyval open("%ARG_0",'r').read()
+
+write:
+    pyval open("%ARG_0",'a+').write("%ARG_1")

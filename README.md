@@ -11,5 +11,6 @@ Features:
     ```
   - Make-like syntax
   - Include other files with `@include`
-  - Use python statements inline with `pyval` and import python packages with `@import`  
-  - A language in under 140 lines!
+  - Working on an stdlib
+  - Use python statements inline with `pyval` and import python packages with `@import`
+  - A language in 140 lines!

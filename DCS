@@ -2,6 +2,7 @@
 from importlib import import_module
 from re import search, match, findall
 from sys import argv
+from os import environ
 def startswith_lpadded(value: str, key: str, count: int, padding: str = '~'):
 	return value.startswith((padding * count) + key)
 def get_lpadding(value: str, padding: str = '~'):
@@ -52,7 +53,10 @@ parser_indent: int = 1
 command_parser_input: dict = {}
 file: str = open(argv[1], 'r').read()
 for include in findall("\\@include\\s*.*", file):
-	file = file.replace(include, open(include.replace("@include ", ''), 'r').read())
+	try:
+		file = file.replace(include, open(environ['DCS_INCLUDE_PATH'] + '/' + include.replace("@include ", ''), 'r').read())
+	except:
+		file = file.replace(include, open(include.replace("@include ", ''), 'r').read())
 for imp in findall("\\@import\\s*.*", file):
 	module = import_module(imp.replace("@import ", '')).__dict__
 	module_dict = module
@@ -87,8 +91,7 @@ def parse(message):
 			if(dict_next(command_ln, command_labels) and (line >= dict_next(command_ln, command_labels) or line > max(command_parser_input.keys()))):
 				return
 			statement: str = command_parser_input[line]
-			if(search('^~*go-', statement)):
-				statement = statement.replace('go', 'go ', 1)
+			statement = statement.replace('go-', 'go -', 1)
 			statement = statement.replace("%ARGSV", ' '.join(message_sub[1:]))
 			arg_vars: list = findall('%ARG_[0-9]', statement)
 			for arg in arg_vars:
@@ -108,7 +111,7 @@ def parse(message):
 				continue
 			for key in variable_map:
 				statement = statement.replace('%' + key, str(variable_map[key]))
-			numcond_vars = findall('[0-9]*[>,<][0-9]*', statement)
+			numcond_vars = findall('[0-9]*[><][0-9]*', statement)
 			for cond in numcond_vars:
 				statement = statement.replace(cond, str(eval(cond)).upper())
 			statement_sub: str = statement.split(' ', 1)

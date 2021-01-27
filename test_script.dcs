@@ -1,13 +1,16 @@
 #!/usr/local/bin/DCS
-@include base.dcs
+@include io.dcs
+@import time
 
 pw:
 	call print %ARGSV
-	call wait 1
+	pyval sleep(1)
 
 main:
 	call print What is your name?
-	pyval input()
+	call input
+	call write tmp %return
+	call read tmp
 	call pw Hello %return
 
 	if true
