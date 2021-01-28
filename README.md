@@ -3,10 +3,10 @@ A terrible lang I wrote for fun
 
 Features:
   - Flow control with `if` and `go`
-  - `%variables = true`
+  - `%typeless_variables = true`
   - ```
     functions:
-        print With %ARG_0
+        call print With %ARG_0
         call functions recursion!
     ```
   - Make-like syntax
