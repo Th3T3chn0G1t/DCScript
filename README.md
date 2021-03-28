@@ -1,5 +1,7 @@
 # DCScript
-A terrible lang I wrote for fun
+A scripting language in 130 lines of python
+
+Aimed to learn about programming languages, can be used anywhere with python integration
 
 Features:
   - Flow control with `if` and `go`
