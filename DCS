@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2021 TTG <prs.ttg+dcs@pm.me>
 from importlib import import_module
 from re import search, match, findall
 from sys import argv
